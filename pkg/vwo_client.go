@@ -21,9 +21,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/wingify/vwo-fme-go-sdk/sdk/constants"
-	"github.com/wingify/vwo-fme-go-sdk/sdk/httpclient"
-	"github.com/wingify/vwo-fme-go-sdk/sdk/models"
+	"github.com/wingify/vwo-fme-go-sdk/pkg/constants"
+	"github.com/wingify/vwo-fme-go-sdk/pkg/httpclient"
+	"github.com/wingify/vwo-fme-go-sdk/pkg/models"
 )
 
 // VWOClient represents the client that interacts with VWO services.

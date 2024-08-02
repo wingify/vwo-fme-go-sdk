@@ -20,42 +20,46 @@ go get "github.com/wingify/vwo-fme-go-sdk"
 ```go
 import vwo "github.com/wingify/vwo-fme-go-sdk"
 
-    options := map[string]interface{}{
-		"sdkKey":            "your_sdk_key",
-		"accountId":         "your_account_id",
-		"gatewayServiceURL": "your_gateway_sercice_url", // http://localhost:3000
-	}
+// init options for vwo client
+options := map[string]interface{}{
+  "sdkKey":            "your_sdk_key",
+  "accountId":         "your_account_id",
+  "gatewayServiceURL": "http://your.host.com:port", // check section - How to Setup Gateway Service - for more details
+}
 
-    instance, err := vwo.Init(options)
+// initialize the vwo client
+instance, err := vwo.Init(options)
 
-    // Correct JSON string with double quotes
-	customVars := `{"key": "value"}`
+// map for pre-segmentation based on customVariables
+customVariables := map[string]interface{}{
+  "custom_variable_key":  "custom_variable_value",
+}
 
-	// Parse the JSON string into a Go map
-	var customVariables map[string]interface{}
-	json.Unmarshal([]byte(customVars), &customVariables)
+// Create the user context map
+userContext := map[string]interface{}{
+  "userId":          "user_id",
+  "customVariables": customVariables, // pass customVariables if using customVariables pre-segmentation
+  "userAgent":       "visitor_user_agent",
+  "ipAddress":       "visitor_ip_address",
+}
 
-    // Create the user context map
-	userContext := map[string]interface{}{
-		"userId":          "user_id",
-		"customVariables": customVariables, // pass customVariables if using customVariables pre-segmentation
-		"userAgent":       "visitor_user_agent",
-		"ipAddress":       "visitor_ip_address",
-	}
+// get flag to check if feature is Enabled for the user
+getFlag, err := instance.GetFlag("feature_key", userContext)
 
-    // get flag to check if feature is Enabled for the user
-    getFlag, err := instance.GetFlag("feature_key", userContext)
+isFeatureEnabled := getFlag.IsEnabled()
+getVariableValue := getFlag.GetVariable("variable_key", "default_value")
 
-    isFeatureEnabled := getFlag.IsEnabled()
-    getVariableValue := getFlag.GetVariable("variable_key", "default_value")
+// trackEvent to track the conversion for the user
+trackEventResponse, err := instance.TrackEvent("event_name", userContext, nil)
 
-    // trackEvent to track the conversion for the user
-    trackEventResponse, err := instance.TrackEvent("event_name", userContext, nil) 
-
-    // setAttribute to send attribute data for the user
-    instance.SetAttribute("attribute_key", "attribute_value", userContext)
+// setAttribute to send attribute data for the user
+instance.SetAttribute("attribute_key", "attribute_value", userContext)
 
 ```
+
+## How to Setup Gateway Service
+To Setup the Gateway Service, refer to [this](https://hub.docker.com/r/wingifysoftware/vwo-fme-gateway-service)
+
 
 ## Contributing
 

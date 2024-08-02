@@ -18,30 +18,30 @@ package vwo
 import (
 	"errors"
 
-	"github.com/wingify/vwo-fme-go-sdk/sdk"
-	"github.com/wingify/vwo-fme-go-sdk/sdk/models"
+	pkg "github.com/wingify/vwo-fme-go-sdk/pkg"
+	"github.com/wingify/vwo-fme-go-sdk/pkg/models"
 )
 
-var instance *sdk.VWOClient
+var instance *pkg.VWOClient
 
 // SetInstance configures and builds the VWO instance using the provided options.
 // It initializes the VWO client with the given options and fetches the settings.
-func SetInstance(options models.VWOInitOptions) (*sdk.VWOClient, error) {
-	vwoBuilder := sdk.NewVWOBuilder(options)
+func SetInstance(options models.VWOInitOptions) (*pkg.VWOClient, error) {
+	vwoBuilder := pkg.NewVWOBuilder(options)
 	vwoBuilder.InitClient()
 	settings := vwoBuilder.GetSettings(false)
-	return sdk.NewVWOClient(settings, options), nil
+	return pkg.NewVWOClient(settings, options), nil
 }
 
 // GetInstance gets the singleton instance of VWO.
 // It returns the VWO client instance if it has been initialized.
-func GetInstance() *sdk.VWOClient {
+func GetInstance() *pkg.VWOClient {
 	return instance
 }
 
 // Init initializes the VWO instance with the provided options.
 // It validates the options and sets up the VWO client instance.
-func Init(options map[string]interface{}) (*sdk.VWOClient, error) {
+func Init(options map[string]interface{}) (*pkg.VWOClient, error) {
 
 	if options["sdkKey"] == nil || options["sdkKey"].(string) == "" {
 		return nil, errors.New("sdkKey is required to initialize VWO. Please provide the sdkKey in the options")

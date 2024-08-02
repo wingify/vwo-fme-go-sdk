@@ -18,9 +18,9 @@ package sdk
 import (
 	"sync"
 
-	"github.com/wingify/vwo-fme-go-sdk/sdk/constants"
-	"github.com/wingify/vwo-fme-go-sdk/sdk/httpclient"
-	"github.com/wingify/vwo-fme-go-sdk/sdk/models"
+	"github.com/wingify/vwo-fme-go-sdk/pkg/constants"
+	"github.com/wingify/vwo-fme-go-sdk/pkg/httpclient"
+	"github.com/wingify/vwo-fme-go-sdk/pkg/models"
 )
 
 // VWOBuilder is responsible for building and initializing the VWO client.
