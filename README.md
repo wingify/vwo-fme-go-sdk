@@ -3,8 +3,6 @@
 ![Size in Bytes](https://img.shields.io/github/languages/code-size/wingify/vwo-fme-go-sdk)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
-This open source library allows you to A/B Test your Website at server-side.
-
 ## Requirements
 
 - Works with Go 1.16+
@@ -57,8 +55,9 @@ instance.SetAttribute("attribute_key", "attribute_value", userContext)
 
 ```
 
-## How to Setup Gateway Service
-To Setup the Gateway Service, refer to [this](https://hub.docker.com/r/wingifysoftware/vwo-fme-gateway-service)
+## How to Setup VWO Gateway Service
+
+To Setup the VWO Gateway Service, refer to [this](https://hub.docker.com/r/wingifysoftware/vwo-fme-gateway-service).
 
 
 ## Contributing
