@@ -53,8 +53,8 @@ func (vc *VWOClient) GetFlag(featureKey string, context map[string]interface{}) 
 		return nil, errors.New("featureKey is required to get the feature flag")
 	}
 
-	if context == nil {
-		return nil, errors.New("context is required to get the feature flag")
+	if context == nil || context["id"] == nil || context["id"] == "" {
+		return nil, errors.New("userId is required to get the feature flag")
 	}
 
 	context["featureKey"] = featureKey
@@ -82,7 +82,7 @@ func (vc *VWOClient) TrackEvent(eventName string, context map[string]interface{}
 		return "", errors.New("eventName is required to track the event")
 	}
 
-	if context == nil || context["userId"] == nil || context["userId"] == "" {
+	if context == nil || context["id"] == nil || context["id"] == "" {
 		return "", errors.New("userId is required to track the event")
 	}
 
@@ -118,7 +118,7 @@ func (vc *VWOClient) SetAttribute(attributeKey string, attributeValue interface{
 		return errors.New("attributeValue is required for setAttribute")
 	}
 
-	if context == nil || context["userId"] == nil || context["userId"] == "" {
+	if context == nil || context["id"] == nil || context["id"] == "" {
 		return errors.New("userId is required for setAttribute")
 	}
 

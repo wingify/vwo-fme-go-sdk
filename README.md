@@ -20,8 +20,8 @@ import vwo "github.com/wingify/vwo-fme-go-sdk"
 
 // init options for vwo client
 options := map[string]interface{}{
-  "sdkKey":            "your_sdk_key",
-  "accountId":         "your_account_id",
+  "sdkKey": "your_sdk_key",
+  "accountId": "your_account_id",
   "gatewayServiceURL": "http://your.host.com:port", // check section - How to Setup Gateway Service - for more details
 }
 
@@ -35,10 +35,10 @@ customVariables := map[string]interface{}{
 
 // Create the user context map
 userContext := map[string]interface{}{
-  "userId":          "user_id",
+  "id": "user_id",
   "customVariables": customVariables, // pass customVariables if using customVariables pre-segmentation
-  "userAgent":       "visitor_user_agent",
-  "ipAddress":       "visitor_ip_address",
+  "userAgent": "visitor_user_agent",
+  "ipAddress": "visitor_ip_address",
 }
 
 // get flag to check if feature is Enabled for the user
