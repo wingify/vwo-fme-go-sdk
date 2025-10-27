@@ -1,0 +1,24 @@
+{
+  "API_CALLED": "API - {apiName} called",
+  "SERVICE_INITIALIZED": "VWO {service} initialized while creating an instance of SDK",
+
+  "EXPERIMENTS_EVALUATION_WHEN_ROLLOUT_PASSED": "Rollout rule got passed for user {userId}. Hence, evaluating experiments",
+  "EXPERIMENTS_EVALUATION_WHEN_NO_ROLLOUT_PRESENT": "No Rollout rules present for the feature. Hence, checking experiment rules",
+
+  "USER_BUCKET_TO_VARIATION": "User ID:{userId} for experiment:{campaignKey} having percent traffic:{percentTraffic} got bucket-value:{bucketValue} and hash-value:{hashValue}",
+
+  "IMPRESSION_FOR_TRACK_USER": "Impression built for vwo_variationShown(VWO standard event for tracking user) event haivng Account ID:{accountId}, User ID:{userId}, and experiment ID:{campaignId}",
+  "IMPRESSION_FOR_TRACK_GOAL": "Impression built for event:{eventName} event having Account ID:{accountId}, and user ID:{userId}",
+  "IMPRESSION_FOR_SYNC_VISITOR_PROP": "Impression built for {eventName}(VWO internal event) event for Account ID:{accountId}, and user ID:{userId}",
+
+  "CONFIG_BATCH_EVENT_LIMIT_EXCEEDED": "Impression event - {endPoint} failed due to exceeding payload size. Parameter eventsPerRequest in batchEvents config in launch API has value:{eventsPerRequest} for account ID:{accountId}. Please read the official documentation for knowing the size limits",
+  "EVENT_BATCH_BEFORE_FLUSHING": "Flushing event queue {manually} having {length} events for Account ID:{accountId}. {timer}",
+  "EVENT_BATCH_FLUSH": "Manually flushing batch events for Account ID:{accountId} having {queueLength} events",
+  "BATCH_QUEUE_EMPTY": "Batch queue is empty. Nothing to flush.",
+  "USING_POLL_INTERVAL_FROM_SETTINGS": "key: pollInterval not found or invalid. Using pollInterval from {source} {pollInterval}.",
+  "NETWORK_CALL_SUCCESS": "Impression for {event} - {endPoint} was successfully received by VWO having Account ID:{accountId}, User ID:{userId} and UUID: {uuid}",
+  "EVENT_ADDED_TO_QUEUE": "Event added to queue. Current queue size: {queueSize}",
+  "QUEUE_REACHED_MAX_CAPACITY": "Queue reached max capacity, flushing now...",
+  "BATCH_TIMER_INITIALIZED": "Batch timer initialized with interval: {interval} seconds.",
+  "BATCH_EVENT_QUEUE_INITIALIZED": "Batch event queue initialized with eventsPerRequest: {eventsPerRequest} and requestTimeInterval: {requestTimeInterval}"
+}

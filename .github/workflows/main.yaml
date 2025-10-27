@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, github-action ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    if: "!contains(toJSON(github.event.commits.*.message), '[skip-ci]')"
+    name: Test on go ${{ matrix.go-version }} and ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+        go-version: [ 1.16, 1.17, 1.18, 1.19, 1.21, 1.22, 1.23]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Run tests
+        run: go test ./test/... -v
+      - name: Upload coverage to Codecov
+        run: |
+          bash <(curl -s https://codecov.io/bash)
+      - name: Notification
+        if: always()
+        id: slack
+        uses: wingify/slack-github-action@v1.15.1-wingify
+        with:
+          channel-id: 'vwo-fs-fme-sdk-job-status'
+          slack-message: "<!here> Go FME SDK Test on *Go-${{ matrix.go-version }}* and *${{ matrix.os }}* got *${{job.status}}* ${{job.status == 'success' && ':heavy_check_mark:' || ':x:'}} \nCommit: `${{github.event.head_commit.message}}`. \nCheck the latest build: https://github.com/wingify/vwo-fme-go-sdk/actions"
+          color: "${{job.status == 'success' && '#00FF00' || '#FF0000'}}"
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_NOTIFICATIONS_BOT_TOKEN }}
