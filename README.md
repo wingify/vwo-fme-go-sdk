@@ -1,7 +1,6 @@
 # VWO Feature Management and Experimentation SDK for Go
 
 [![CI](https://github.com/wingify/vwo-fme-go-sdk/workflows/CI/badge.svg?branch=master)](https://github.com/wingify/vwo-fme-go-sdk/actions?query=workflow%3ACI)
-[![codecov](https://codecov.io/gh/wingify/vwo-fme-go-sdk/branch/master/graph/badge.svg?token=WZ9LNISPPJ)](https://codecov.io/gh/wingify/vwo-fme-go-sdk)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
 ## Overview
@@ -211,7 +210,7 @@ Example usage:
 attributeMap := map[string]interface{}{
     "plan":        "premium",
     "trial_used":  true,
-    "signup_date": "2024-01-01",
+    "signup_date": "2025-01-01",
 }
 
 err := vwoInstance.SetAttribute(attributeMap, context)
@@ -454,4 +453,4 @@ Our [Code of Conduct](https://github.com/wingify/vwo-fme-go-sdk/blob/master/CODE
 
 [Apache License, Version 2.0](https://github.com/wingify/vwo-fme-go-sdk/blob/master/LICENSE)
 
-Copyright 2024-2025 Wingify Software Pvt. Ltd.
+Copyright 2025 Wingify Software Pvt. Ltd.
