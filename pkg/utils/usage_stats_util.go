@@ -17,6 +17,7 @@
 package utils
 
 import (
+	"fmt"
 	"runtime"
 
 	"github.com/wingify/vwo-fme-go-sdk/pkg/models"
@@ -139,6 +140,8 @@ func SendSDKUsageStatsEvent(
 		"",
 		"",
 	)
+	// add usage stats account id to the properties
+	properties["a"] = fmt.Sprintf("%d", usageStatsAccountId)
 
 	// Construct payload data for tracking the user
 	payload := GetSDKUsageStatsEventPayload(

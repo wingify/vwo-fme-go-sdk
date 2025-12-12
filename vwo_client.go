@@ -117,9 +117,11 @@ func sendInitAndUsageStatsEvents(serviceContainer interfaces.ServiceContainerInt
 			wasInitializedEarlier = val
 		}
 	}
-	if serviceContainer.GetSettingsManager().GetIsSettingsValidOnInit() && !wasInitializedEarlier {
-		// Send SDK init event
-		utils.SendSDKInitEvent(serviceContainer, contextModel, int(settingsFetchTime), int(sdkInitTime))
+	if serviceContainer.GetSettingsManager().GetIsSettingsValidOnInit() {
+		if !wasInitializedEarlier {
+			// Send SDK init event
+			utils.SendSDKInitEvent(serviceContainer, contextModel, int(settingsFetchTime), int(sdkInitTime))
+		}
 
 		// get usage stats account id
 		usageStatsAccountId := serviceContainer.GetSettings().GetUsageStatsAccountID()
