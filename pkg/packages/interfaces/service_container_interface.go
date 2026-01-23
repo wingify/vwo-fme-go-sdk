@@ -29,7 +29,6 @@ import (
 type ServiceContainerInterface interface {
 	GetLoggerService() LoggerServiceInterface
 	GetSettings() *settings.Settings
-	GetBaseUrl() string
 	GetVWOInitOptions() *models.VWOInitOptions
 	GetSettingsManager() SettingsManagerInterface
 	GetHooksManager() HooksManagerInterface

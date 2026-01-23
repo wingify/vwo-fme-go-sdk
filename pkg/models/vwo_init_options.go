@@ -38,6 +38,7 @@ type VWOInitOptions struct {
 	RetryConfig          *RetryConfig           `json:"retryConfig,omitempty"`
 	IsAliasingEnabled    bool                   `json:"isAliasingEnabled,omitempty"`
 	BatchEventData       map[string]interface{} `json:"batchEventData,omitempty"`
+	ProxyURL             string                 `json:"proxyUrl,omitempty"`
 }
 
 func NewVWOInitOptions(options map[string]interface{}) *VWOInitOptions {
@@ -97,6 +98,9 @@ func NewVWOInitOptions(options map[string]interface{}) *VWOInitOptions {
 	}
 	if batchEventData, ok := options[enums.OptionBatchEventData.GetValue()].(map[string]interface{}); ok {
 		vwoInitOptions.BatchEventData = batchEventData
+	}
+	if proxyURL, ok := options[enums.OptionProxyURL.GetValue()].(string); ok {
+		vwoInitOptions.ProxyURL = proxyURL
 	}
 	return vwoInitOptions
 }

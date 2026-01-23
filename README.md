@@ -99,6 +99,7 @@ To customize the SDK further, additional parameters can be passed to the `Init()
 | `logger`                     | Toggle log levels for more insights or for debugging purposes. You can also customize your own transport in order to have better control over log messages. | No           | Object   | See [Logger](#logger) section   |
 | `integrations`               | Callback function for integrating with third-party analytics services.                                                                                      | No           | Function | See [Integrations](#integrations) section |
 | `retryConfig`                | Configuration for network request retry behavior and exponential backoff strategy                                                                           | No           | Object   | See [Retry Config](#retry-config) section |
+| `proxyUrl`                     | Custom proxy URL for redirecting all SDK network requests through a proxy server. | No           | String   | See [Proxy URL](#proxy-url) section   |
 
 Refer to the [official VWO documentation](https://developers.vwo.com/v2/docs/fme-go-install) for additional parameter details.
 
@@ -436,6 +437,26 @@ With this configuration, the retry delays would be:
 - 3rd retry: 12 seconds (3 × 2^2)
 - 4th retry: 24 seconds (3 × 2^3)
 - 5th retry: 48 seconds (3 × 2^4)
+
+### Proxy URL
+
+The `proxyUrl` parameter allows you to redirect all SDK network calls through a custom proxy server. This feature enables you to route all SDK network requests (settings, tracking, etc.) through your own proxy server, providing better control over network traffic and security.
+
+#### How to Use Proxy URL
+
+The proxy URL can be configured by passing the `proxyUrl` parameter in the `init` configuration.
+
+```go
+options := map[string]interface{}{
+    "sdkKey":    "32-alpha-numeric-sdk-key", // Replace with your SDK key
+    "accountId": "123456",                   // Replace with your account ID
+    "proxyUrl": "https://custom.proxy.com"   // Replace with your custom proxy url
+}
+
+// Initialize VWO instance
+vwoInstance, err := vwo.Init(options)
+```
+**Note:** If both `gatewayService` and `proxyUrl` are provided, the SDK will give preference to the `gatewayService` for all network requests.
 
 ### Version History
 

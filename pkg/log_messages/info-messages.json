@@ -45,5 +45,6 @@
   "ALIAS_ENABLED": "Aliasing enabled, using {userId} as userId",
 
   "NETWORK_CALL_SUCCESS_WITH_RETRIES": "Network call for {extraData} succeeded after {attempts} retry attempt(s). Previous attempts failed with error: {err}",
-  "NO_WINNER_CAMPAIGN_FOUND_FOR_MEG_GROUP": "No winner campaign found for MEG group: {groupId}"
+  "NO_WINNER_CAMPAIGN_FOUND_FOR_MEG_GROUP": "No winner campaign found for MEG group: {groupId}",
+  "PROXY_AND_GATEWAY_SERVICE_PROVIDED": "Both proxy URL and gateway service are provided. Gateway service will be used and proxy URL will be ignored"
 }

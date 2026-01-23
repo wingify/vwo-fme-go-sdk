@@ -150,6 +150,7 @@ func (vwoBuilder *vwoBuilder) InitBatching() *vwoBuilder {
 			vwoBuilder.options.AccountID,
 			vwoBuilder.options.SDKKey,
 			vwoBuilder.logManager,
+			vwoBuilder.settingsManager,
 		)
 		vwoBuilder.batchEventQueue.SetNetworkManager(vwoBuilder.networkManager)
 

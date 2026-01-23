@@ -109,21 +109,6 @@ func (sc *ServiceContainer) GetSettings() *settings.Settings {
 	return sc.settings
 }
 
-// GetBaseUrl returns the base URL for API requests
-func (sc *ServiceContainer) GetBaseUrl() string {
-	baseUrl := sc.settingsManager.Hostname
-
-	if sc.settingsManager.IsGatewayServiceProvided {
-		return baseUrl
-	}
-
-	if sc.settings.GetCollectionPrefix() != "" {
-		return baseUrl + "/" + sc.settings.GetCollectionPrefix()
-	}
-
-	return baseUrl
-}
-
 // getIntegrationsCallback extracts the callback function from IntegrationOptions
 func getIntegrationsCallback(integrations *models.IntegrationOptions) func(map[string]interface{}) {
 	if integrations != nil {

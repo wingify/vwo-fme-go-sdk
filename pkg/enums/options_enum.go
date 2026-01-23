@@ -34,6 +34,7 @@ const (
 	OptionRetryConfig          OptionsEnum = "retryConfig"
 	OptionIsAliasingEnabled    OptionsEnum = "isAliasingEnabled"
 	OptionBatchEventData       OptionsEnum = "batchEventData"
+	OptionProxyURL             OptionsEnum = "proxyUrl"
 )
 
 // GetValue returns the string value of the options enum

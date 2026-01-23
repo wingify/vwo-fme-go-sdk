@@ -55,6 +55,8 @@ type SettingsManager struct {
 	settings                 *settings.Settings
 	settingsString           string
 	networkManager           *manager.NetworkManager
+	IsProxyURLProvided       bool
+	ProxyURL                 string
 }
 
 // NewSettingsManager creates a new settings manager
@@ -72,6 +74,12 @@ func NewSettingsManager(options *models.VWOInitOptions, logManager interfaces.Lo
 	if options.GatewayService != nil {
 		settingsManager.IsGatewayServiceProvided = true
 		settingsManager.parseGatewayService(options.GatewayService)
+		if options.ProxyURL != "" {
+			settingsManager.logManager.Info(log.BuildMessage(log.InfoLogMessagesEnum["PROXY_AND_GATEWAY_SERVICE_PROVIDED"], map[string]interface{}{}))
+		}
+	} else if options.ProxyURL != "" {
+		settingsManager.IsProxyURLProvided = true
+		settingsManager.parseProxyURL(options.ProxyURL)
 	} else {
 		settingsManager.Hostname = constants.HostName
 	}
@@ -135,7 +143,7 @@ func (settingsManager *SettingsManager) parseGatewayService(gatewayService map[s
 	}
 
 	if err != nil {
-		settingsManager.logManager.Error("ERROR_PARSING_GATEWAY_URL", map[string]interface{}{"err": err.Error()}, map[string]interface{}{"an": enums.ApiInit})
+		settingsManager.logManager.Error("ERROR_PARSING_PROXY_URL", map[string]interface{}{"err": err.Error()}, map[string]interface{}{"an": enums.ApiInit})
 		settingsManager.Hostname = constants.HostName
 		return
 	}
@@ -148,6 +156,25 @@ func (settingsManager *SettingsManager) parseGatewayService(gatewayService map[s
 	} else if gatewayPort != 0 {
 		settingsManager.Port = gatewayPort
 	}
+}
+
+// parseProxyURL parses the proxy URL
+func (settingsManager *SettingsManager) parseProxyURL(proxyURL string) {
+	defer func() {
+		if r := recover(); r != nil {
+			settingsManager.logManager.Error("ERROR_PARSING_PROXY_URL", map[string]interface{}{"err": fmt.Sprintf("%v", r)}, map[string]interface{}{"an": enums.ApiInit})
+			settingsManager.Hostname = constants.HostName
+		}
+	}()
+
+	parsedURL, err := url.Parse(proxyURL)
+	if err != nil {
+		settingsManager.logManager.Error("ERROR_PARSING_PROXY_URL", map[string]interface{}{"err": err.Error()}, map[string]interface{}{"an": enums.ApiInit})
+		return
+	}
+	settingsManager.Hostname = parsedURL.Hostname()
+	settingsManager.Protocol = parsedURL.Scheme
+	fmt.Sscanf(parsedURL.Port(), "%d", &settingsManager.Port)
 }
 
 // GetSettingsFetchTime gets the settings fetch time
@@ -336,6 +363,14 @@ func (settingsManager *SettingsManager) GetSettings(forceFetch bool) string {
 	return settingsData
 }
 
+// GetUpdatedEndpointWithCollectionPrefix returns the updated endpoint with collection prefix
+func (settingsManager *SettingsManager) GetUpdatedEndpointWithCollectionPrefix(endpoint string) string {
+	if settingsManager.settings.GetCollectionPrefix() != "" {
+		return "/" + settingsManager.settings.GetCollectionPrefix() + endpoint
+	}
+	return endpoint
+}
+
 // GetSettingsObject returns the parsed settings object
 func (settingsManager *SettingsManager) GetSettingsObject() *settings.Settings {
 	return settingsManager.settings
@@ -344,6 +379,11 @@ func (settingsManager *SettingsManager) GetSettingsObject() *settings.Settings {
 // GetIsGatewayServiceProvided returns whether gateway service is provided
 func (settingsManager *SettingsManager) GetIsGatewayServiceProvided() bool {
 	return settingsManager.IsGatewayServiceProvided
+}
+
+// GetIsProxyURLProvided returns whether proxy URL is provided
+func (settingsManager *SettingsManager) GetIsProxyURLProvided() bool {
+	return settingsManager.IsProxyURLProvided
 }
 
 // GetLoggerService returns the logger service

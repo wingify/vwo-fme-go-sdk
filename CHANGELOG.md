@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-01-23
+
+### Added
+
+- Added support for redirecting all network calls through a custom proxy URL. This feature allows users to route all SDK network requests (settings, tracking, etc.) through their own proxy server.
+	```go
+	options := map[string]interface{}{
+		"sdkKey":    "32-alpha-numeric-sdk-key", // Replace with your SDK key
+		"accountId": "123456",                   // Replace with your account ID
+		"proxyUrl": "https://custom.proxy.com"   // Replace with your custom proxy url
+	}
+
+	// Initialize VWO instance
+	vwoInstance, err := vwo.Init(options)
+	```
+	**Note**: If both gateway_service and proxy_url are provided, the SDK will give preference to the gateway_service for all network requests.
+
 ## [1.4.0] - 2025-12-12
 
 ### Fixed

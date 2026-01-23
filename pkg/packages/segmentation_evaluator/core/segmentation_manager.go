@@ -84,8 +84,7 @@ func (sm *SegmentationManager) SetContextualData(
 	}
 
 	// If gateway service is required and the base URL is not the default one, fetch the data from the gateway service
-	baseURL := serviceContainer.GetBaseUrl()
-	if feature.IsGatewayServiceRequired && baseURL != constants.HostName && context.VWO == nil {
+	if feature.IsGatewayServiceRequired && serviceContainer.GetSettingsManager().GetIsGatewayServiceProvided() {
 		queryParams := make(map[string]string)
 
 		if context.UserAgent == "" && context.IPAddress == "" {

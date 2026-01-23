@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/wingify/vwo-fme-go-sdk/pkg/constants"
 	"github.com/wingify/vwo-fme-go-sdk/pkg/enums"
 	"github.com/wingify/vwo-fme-go-sdk/pkg/packages/interfaces"
 	networkModels "github.com/wingify/vwo-fme-go-sdk/pkg/packages/network_layer/models"
@@ -40,16 +39,16 @@ func GetFromGatewayService(
 		}
 	}()
 
-	if serviceContainer.GetBaseUrl() == constants.HostName {
+	if !serviceContainer.GetSettingsManager().GetIsGatewayServiceProvided() {
 		serviceContainer.GetLoggerService().Error("INVALID_GATEWAY_URL", nil, serviceContainer.GetDebuggerService().GetStandardDebugProps())
 		return "", fmt.Errorf("gateway URL error: base URL is default hostname")
 	}
 
 	// Create request model
 	request := networkModels.NewRequestModel(
-		serviceContainer.GetBaseUrl(),
+		serviceContainer.GetSettingsManager().GetHostname(),
 		enums.ApiMethodGet.GetValue(),
-		endpoint,
+		serviceContainer.GetSettingsManager().GetUpdatedEndpointWithCollectionPrefix(endpoint),
 		queryParams,
 		nil,
 		nil,

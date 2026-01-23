@@ -143,9 +143,9 @@ func SendPostAPIRequest(serviceContainer interfaces.ServiceContainerInterface, p
 	headers := createHeaders(context.GetUserAgent(), context.GetIPAddress())
 	eventName := properties["en"]
 	request := networkModels.NewRequestModel(
-		serviceContainer.GetBaseUrl(),
+		serviceContainer.GetSettingsManager().GetHostname(),
 		enums.ApiMethodPost.GetValue(),
-		enums.Events.GetURL(),
+		serviceContainer.GetSettingsManager().GetUpdatedEndpointWithCollectionPrefix(enums.Events.GetURL()),
 		properties,
 		payload,
 		headers,
@@ -255,14 +255,14 @@ func SendEventDirectlyToDACDN(settingsManager interfaces.SettingsManagerInterfac
 	headers := createHeaders("", "")
 
 	request := networkModels.NewRequestModel(
-		constants.HostName,
+		settingsManager.GetHostname(),
 		enums.ApiMethodPost.GetValue(),
-		enums.Events.GetURL(),
+		settingsManager.GetUpdatedEndpointWithCollectionPrefix(enums.Events.GetURL()),
 		properties,
 		payload,
 		headers,
-		constants.HTTPSProtocol,
-		0,
+		settingsManager.GetProtocol(),
+		settingsManager.GetPort(),
 		eventName,
 	)
 

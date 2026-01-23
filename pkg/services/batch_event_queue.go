@@ -23,7 +23,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/wingify/vwo-fme-go-sdk/pkg/constants"
 	"github.com/wingify/vwo-fme-go-sdk/pkg/enums"
 	log "github.com/wingify/vwo-fme-go-sdk/pkg/log_messages"
 	"github.com/wingify/vwo-fme-go-sdk/pkg/models"
@@ -48,6 +47,7 @@ type BatchEventQueue struct {
 	settings            *settingsModel.Settings
 	mutex               sync.Mutex
 	networkManager      *manager.NetworkManager
+	settingsManager     interfaces.SettingsManagerInterface
 	isInitialized       bool
 }
 
@@ -59,6 +59,7 @@ func NewBatchEventQueue(
 	accountID int,
 	sdkKey string,
 	logManager interfaces.LoggerServiceInterface,
+	settingsManager interfaces.SettingsManagerInterface,
 ) *BatchEventQueue {
 	queue := &BatchEventQueue{
 		batchQueue:          make([]map[string]interface{}, 0),
@@ -70,6 +71,7 @@ func NewBatchEventQueue(
 		logManager:          logManager,
 		stopChan:            make(chan bool, 1),
 		isInitialized:       true,
+		settingsManager:     settingsManager,
 	}
 
 	queue.createNewBatchTimer()
@@ -244,24 +246,19 @@ func (batchEventQueue *BatchEventQueue) SendPostBatchRequest(payload interface{}
 		"env": sdkKey,
 	}
 
-	url := constants.HostName
-	if batchEventQueue.settings.GetCollectionPrefix() != "" {
-		url = url + "/" + batchEventQueue.settings.GetCollectionPrefix()
-	}
-
 	// Create the request model
 	requestModel := networkModels.NewRequestModel(
-		url,
+		batchEventQueue.settingsManager.GetHostname(),
 		enums.ApiMethodPost.GetValue(),
-		enums.BatchEvents.GetURL(),
+		batchEventQueue.settingsManager.GetUpdatedEndpointWithCollectionPrefix(enums.BatchEvents.GetURL()),
 		query,
 		batchPayload,
 		map[string]string{
 			"Authorization": sdkKey,
 			"Content-Type":  "application/json",
 		},
-		constants.HTTPSProtocol,
-		0,
+		batchEventQueue.settingsManager.GetProtocol(),
+		batchEventQueue.settingsManager.GetPort(),
 		"",
 	)
 

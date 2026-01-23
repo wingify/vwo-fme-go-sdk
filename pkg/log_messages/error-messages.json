@@ -56,5 +56,6 @@
   "ERROR_PARSING_GATEWAY_URL": "Error occurred while parsing gateway service URL: {err}",
   "ERROR_SENDING_BATCH_EVENTS": "Error sending batch events. Error: {err}",
   "NETWORK_CALL_FAILURE_AFTER_MAX_RETRIES": "Network call for {extraData} failed after {attempts} retry attempt(s). Got Error: {err}",
-  "ERROR_SENDING_DEBUG_EVENT_TO_VWO": "Error occurred while sending debug event to VWO. Error: {err}"
+  "ERROR_SENDING_DEBUG_EVENT_TO_VWO": "Error occurred while sending debug event to VWO. Error: {err}",
+  "ERROR_PARSING_PROXY_URL": "Error occurred while parsing proxy URL: {err}"
 }

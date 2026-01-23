@@ -32,6 +32,8 @@ type SettingsManagerInterface interface {
 	GetPort() int
 	GetSettingsObject() *settings.Settings
 	GetIsGatewayServiceProvided() bool
+	GetIsProxyURLProvided() bool
+	GetUpdatedEndpointWithCollectionPrefix(endpoint string) string
 	GetLoggerService() LoggerServiceInterface
 	GetNetworkManager() *manager.NetworkManager
 
