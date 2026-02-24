@@ -23,17 +23,18 @@ import (
 
 // Settings represents VWO settings
 type Settings struct {
-	SDKKey              string                     `json:"sdkKey"`
-	AccountID           int                        `json:"accountId"`
-	Version             int                        `json:"version"`
-	CollectionPrefix    string                     `json:"collectionPrefix,omitempty"`
-	UsageStatsAccountID int                        `json:"usageStatsAccountId,omitempty"`
-	Features            []campaign.Feature         `json:"features,omitempty"`
-	Campaigns           []campaign.Campaign        `json:"campaigns,omitempty"`
-	CampaignGroups      map[string]int             `json:"campaignGroups,omitempty"`
-	Groups              map[string]campaign.Groups `json:"groups,omitempty"`
-	PollInterval        int                        `json:"pollInterval,omitempty"`
-	SDKMetaInfo         map[string]interface{}     `json:"sdkMetaInfo,omitempty"`
+	SDKKey                   string                     `json:"sdkKey"`
+	AccountID                int                        `json:"accountId"`
+	Version                  int                        `json:"version"`
+	CollectionPrefix         string                     `json:"collectionPrefix,omitempty"`
+	UsageStatsAccountID      int                        `json:"usageStatsAccountId,omitempty"`
+	Features                 []campaign.Feature         `json:"features,omitempty"`
+	Campaigns                []campaign.Campaign        `json:"campaigns,omitempty"`
+	CampaignGroups           map[string]int             `json:"campaignGroups,omitempty"`
+	Groups                   map[string]campaign.Groups `json:"groups,omitempty"`
+	PollInterval             int                        `json:"pollInterval,omitempty"`
+	SDKMetaInfo              map[string]interface{}     `json:"sdkMetaInfo,omitempty"`
+	IsWebConnectivityEnabled *bool                      `json:"isWebConnectivityEnabled,omitempty"`
 }
 
 // GetFeatures returns the features
@@ -94,4 +95,13 @@ func (s *Settings) GetPollInterval() int {
 // GetUsageStatsAccountID returns the usage stats account ID
 func (s *Settings) GetUsageStatsAccountID() int {
 	return s.UsageStatsAccountID
+}
+
+// GetIsWebConnectivityEnabled returns whether web connectivity is enabled.
+// Defaults to true when the field is not present in settings.
+func (s *Settings) GetIsWebConnectivityEnabled() bool {
+	if s.IsWebConnectivityEnabled == nil {
+		return true
+	}
+	return *s.IsWebConnectivityEnabled
 }

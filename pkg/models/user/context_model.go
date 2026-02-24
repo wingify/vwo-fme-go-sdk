@@ -80,15 +80,15 @@ func NewVWOContext(context map[string]interface{}) *VWOContext {
 			vwoContext.VWO = NewContextVWO(vwoMap)
 		}
 	}
-
-	if sessionId, ok := context[enums.ContextSessionID.GetValue()]; ok {
-		if sessionIdInt, ok := sessionId.(int64); ok {
-			vwoContext.SessionId = sessionIdInt
+	sessionId := time.Now().Unix()
+	if contextSessionId, ok := context[enums.ContextSessionID.GetValue()]; ok {
+		if id, ok := contextSessionId.(int); ok {
+			sessionId = int64(id)
+		} else if id, ok := contextSessionId.(int64); ok {
+			sessionId = id
 		}
-	} else {
-		vwoContext.SessionId = time.Now().Unix()
 	}
-
+	vwoContext.SessionId = sessionId
 	return vwoContext
 }
 

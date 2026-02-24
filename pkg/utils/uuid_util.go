@@ -19,9 +19,14 @@ package utils
 import (
 	"crypto/sha1"
 	"encoding/binary"
+	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/wingify/vwo-fme-go-sdk/pkg/constants"
+	"github.com/wingify/vwo-fme-go-sdk/pkg/enums"
+	settingsModel "github.com/wingify/vwo-fme-go-sdk/pkg/models/settings"
 )
 
 // UUID namespaces for UUID v5
@@ -110,4 +115,53 @@ func GetUUIDFromBits(msb, lsb uint64) uuid.UUID {
 	binary.BigEndian.PutUint64(bytes[0:8], msb)
 	binary.BigEndian.PutUint64(bytes[8:16], lsb)
 	return bytesToUUID(bytes)
+}
+
+// IsWebUuid reports whether id is a web-generated UUID.
+// It checks that id looks like a web-generated context ID: D or J + 32 hex chars = 33 chars total.
+func IsWebUuid(id string) bool {
+	return constants.WebUUIDRegex.MatchString(id)
+}
+
+// getUUIDFromContext generates a UUID from context ID, taking into account
+// web connectivity settings and optional useIdForWeb flag on the context.
+func GetUUIDFromContext(context map[string]interface{}, apiName string, accountID int, processedSettings *settingsModel.Settings) (uuid string, isWebUuid bool, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("error getting UUID from context: %v", r)
+			uuid = ""
+			isWebUuid = false
+			return
+		}
+	}()
+
+	userId, ok := context[enums.ContextID.GetValue()].(string)
+	if !ok {
+		return "", false, fmt.Errorf("context ID is not a string")
+	}
+
+	if processedSettings.GetIsWebConnectivityEnabled() != false {
+		// if web connectivity is enabled, check if context ID is a valid web UUID
+		if IsWebUuid(userId) {
+			// if context ID is a valid web UUID, set it as uuid
+			return userId, true, nil
+		}
+
+		// get useIdForWeb from context
+		useIdForWeb, ok := context[enums.ContextUseIdForWeb.GetValue()].(bool)
+		if !ok {
+			useIdForWeb = false
+		}
+
+		// if context useIdForWeb is true and context ID is not a valid web UUID, return error
+		if useIdForWeb {
+			return "", false, fmt.Errorf("UUID passed in context id is not a valid UUID")
+		}
+
+		// if context useIdForWeb is false, fallback to server‑side UUID derivation
+		return GetUUID(userId, strconv.Itoa(accountID)), false, nil
+	}
+
+	// if web connectivity is disabled, fallback to server-side UUID derivation
+	return GetUUID(userId, strconv.Itoa(accountID)), false, nil
 }

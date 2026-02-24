@@ -16,12 +16,16 @@
 
 package models
 
+import "time"
+
 // GetFlagResponse exposes a minimal read-only contract for feature flag consumers
 // so that only the whitelisted methods are available to SDK users.
 type GetFlagResponse interface {
 	IsEnabled() bool
 	GetVariable(key string, defaultValue interface{}) interface{}
 	GetVariables() []map[string]interface{}
+	GetUUID() string
+	GetSessionId() int64
 }
 
 // GetFlag represents the result of a feature flag evaluation
@@ -29,13 +33,23 @@ type GetFlag struct {
 	Enabled   bool        `json:"isEnabled"`
 	Variables []*Variable `json:"variables,omitempty"`
 	Reason    string      `json:"reason,omitempty"`
+	UUID      string      `json:"uuid,omitempty"`
+	SessionId int64       `json:"sessionId,omitempty"`
 }
 
 // NewGetFlag creates a new GetFlag instance
-func NewGetFlag() *GetFlag {
+func NewGetFlag(isEnabled bool, variables []*Variable, uuid string, sessionId int64) *GetFlag {
+	if variables == nil {
+		variables = make([]*Variable, 0)
+	}
+	if sessionId == 0 {
+		sessionId = time.Now().Unix()
+	}
 	return &GetFlag{
-		Enabled:   false,
-		Variables: make([]*Variable, 0),
+		Enabled:   isEnabled,
+		Variables: variables,
+		UUID:      uuid,
+		SessionId: sessionId,
 	}
 }
 
@@ -44,14 +58,14 @@ func (gf *GetFlag) IsEnabled() bool {
 	return gf.Enabled
 }
 
-// SetIsEnabled sets whether the flag is enabled
-func (gf *GetFlag) SetIsEnabled(isEnabled bool) {
-	gf.Enabled = isEnabled
+// GetUUID returns the UUID
+func (gf *GetFlag) GetUUID() string {
+	return gf.UUID
 }
 
-// SetVariables sets the variables list
-func (gf *GetFlag) SetVariables(variables []*Variable) {
-	gf.Variables = variables
+// GetSessionId returns the session ID
+func (gf *GetFlag) GetSessionId() int64 {
+	return gf.SessionId
 }
 
 // GetVariablesValue returns the variables list

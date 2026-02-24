@@ -37,7 +37,7 @@ import (
 
 // GetFlag retrieves a feature flag value and returns the decision object
 func GetFlag(featureKey string, context *user.VWOContext, serviceContainer interfaces.ServiceContainerInterface) models.GetFlagResponse {
-	getFlag := models.NewGetFlag()
+	getFlag := models.NewGetFlag(false, nil, context.GetUUID(), context.GetSessionId())
 	shouldCheckForExperimentsRules := false
 
 	passedRulesInformation := make(map[string]interface{})
@@ -75,6 +75,14 @@ func GetFlag(featureKey string, context *user.VWOContext, serviceContainer inter
 	// add standard debug props to the debugger service
 	serviceContainer.GetDebuggerService().AddStandardDebugProps(standardDebugProps)
 
+	// If feature is not found, return false
+	if feature == nil {
+		serviceContainer.GetLoggerService().Error("FEATURE_NOT_FOUND", map[string]interface{}{
+			"featureKey": featureKey,
+		}, serviceContainer.GetDebuggerService().GetStandardDebugProps())
+		return getFlag
+	}
+
 	// Check storage for existing data
 	storageService := services.NewStorageService()
 	storageDecorator := decorators.NewStorageDecorator()
@@ -100,14 +108,8 @@ func GetFlag(featureKey string, context *user.VWOContext, serviceContainer inter
 								"experimentType": "experiment",
 								"experimentKey":  storedData.ExperimentKey,
 							}))
-							getFlag.SetIsEnabled(true)
 							variables := variation.GetVariables()
-							if variables != nil {
-								getFlag.SetVariables(convertVariationsToVariables(variables))
-							} else {
-								getFlag.SetVariables([]*models.Variable{})
-							}
-							return getFlag
+							return models.NewGetFlag(true, convertVariationsToVariables(variables), getFlag.GetUUID(), getFlag.GetSessionId())
 						}
 					}
 				} else if storedData.RolloutKey != "" && storedData.RolloutID != 0 {
@@ -125,13 +127,8 @@ func GetFlag(featureKey string, context *user.VWOContext, serviceContainer inter
 							"userId": context.GetID(),
 						}))
 
-						getFlag.SetIsEnabled(true)
 						variables := variation.GetVariables()
-						if variables != nil {
-							getFlag.SetVariables(convertVariationsToVariables(variables))
-						} else {
-							getFlag.SetVariables([]*models.Variable{})
-						}
+						getFlag = models.NewGetFlag(true, convertVariationsToVariables(variables), getFlag.GetUUID(), getFlag.GetSessionId())
 						shouldCheckForExperimentsRules = true
 						featureInfo := map[string]interface{}{
 							enums.DecisionRolloutID.GetValue():          storedData.RolloutID,
@@ -147,15 +144,6 @@ func GetFlag(featureKey string, context *user.VWOContext, serviceContainer inter
 				}
 			}
 		}
-	}
-
-	// If feature is not found, return false
-	if feature == nil {
-		serviceContainer.GetLoggerService().Error("FEATURE_NOT_FOUND", map[string]interface{}{
-			"featureKey": featureKey,
-		}, serviceContainer.GetDebuggerService().GetStandardDebugProps())
-		getFlag.SetIsEnabled(false)
-		return getFlag
 	}
 
 	// Set contextual data for segmentation
@@ -198,13 +186,8 @@ func GetFlag(featureKey string, context *user.VWOContext, serviceContainer inter
 				context.GetID(),
 			)
 			if variation != nil {
-				getFlag.SetIsEnabled(true)
 				variables := variation.GetVariables()
-				if variables != nil {
-					getFlag.SetVariables(convertVariationsToVariables(variables))
-				} else {
-					getFlag.SetVariables([]*models.Variable{})
-				}
+				getFlag = models.NewGetFlag(true, convertVariationsToVariables(variables), getFlag.GetUUID(), getFlag.GetSessionId())
 				shouldCheckForExperimentsRules = true
 				updateIntegrationsDecisionObject(passedRolloutCampaign, variation, passedRulesInformation, decision)
 				utils.CreateAndSendImpressionForVariationShown(
@@ -254,13 +237,8 @@ func GetFlag(featureKey string, context *user.VWOContext, serviceContainer inter
 				} else {
 					// If whitelisted object is not null, update the decision object
 					if variation, ok := whitelistedObject.(*campaign.Variation); ok {
-						getFlag.SetIsEnabled(true)
 						variables := variation.GetVariables()
-						if variables != nil {
-							getFlag.SetVariables(convertVariationsToVariables(variables))
-						} else {
-							getFlag.SetVariables([]*models.Variable{})
-						}
+						getFlag = models.NewGetFlag(true, convertVariationsToVariables(variables), getFlag.GetUUID(), getFlag.GetSessionId())
 						passedRulesInformation[enums.DecisionExperimentID.GetValue()] = rule.GetID()
 						passedRulesInformation[enums.DecisionExperimentKey.GetValue()] = rule.GetKey()
 						passedRulesInformation[enums.DecisionExperimentVariationID.GetValue()] = variation.GetID()
@@ -288,13 +266,8 @@ func GetFlag(featureKey string, context *user.VWOContext, serviceContainer inter
 				context.GetID(),
 			)
 			if variation != nil {
-				getFlag.SetIsEnabled(true)
 				variables := variation.GetVariables()
-				if variables != nil {
-					getFlag.SetVariables(convertVariationsToVariables(variables))
-				} else {
-					getFlag.SetVariables([]*models.Variable{})
-				}
+				getFlag = models.NewGetFlag(true, convertVariationsToVariables(variables), getFlag.GetUUID(), getFlag.GetSessionId())
 				updateIntegrationsDecisionObject(campaign, variation, passedRulesInformation, decision)
 				utils.CreateAndSendImpressionForVariationShown(
 					serviceContainer,
@@ -380,6 +353,9 @@ func parseStoredData(data map[string]interface{}) (*storage.StorageData, error) 
 
 // convertVariationsToVariables converts campaign variations to models variables
 func convertVariationsToVariables(variations []campaign.Variable) []*models.Variable {
+	if variations == nil {
+		return make([]*models.Variable, 0)
+	}
 	result := make([]*models.Variable, 0, len(variations))
 	for _, variation := range variations {
 		result = append(result, &models.Variable{

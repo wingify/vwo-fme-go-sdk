@@ -135,6 +135,64 @@ context := map[string]interface{}{
 }
 ```
 
+### FME Web Connectivity
+
+FME Web Connectivity allows you to keep visitor identity and sessions in sync between the Go SDK and the VWO Web Insights.
+
+#### Using web UUID from `context["id"]`
+
+When **web connectivity is enabled**, if you pass a valid VWO Web UUID in `context["id"]`, the Go SDK will **use it directly as the visitor UUID** instead of hashing/generating a new one.  
+You can then read the same UUID from the flag result via `GetUUID()` (for example, to pass it to the web client or other services).
+
+```go
+vwoInstance, err := vwo.Init(map[string]interface{}{
+    "accountId": 123456,
+    "sdkKey":    "32-alpha-numeric-sdk-key",
+})
+if err != nil {
+    log.Fatalf("Failed to initialize VWO client: %v", err)
+}
+
+// Default: SDK generates a UUID from id and account
+contextWithGeneratedUuid := map[string]interface{}{"id": "user-123"}
+flag1, err := vwoInstance.GetFlag("feature-key", contextWithGeneratedUuid)
+uuid1 := flag1.GetUUID()
+fmt.Println("Visitor UUID (generated):", uuid1)
+
+// Use your own UUID (e.g. from VWO Web SDK) by passing a valid web UUID in context.id
+contextWithCustomUuid := map[string]interface{}{
+    "id": "D7E2EAA667909A2DB8A6371FF0975C2A5", // your existing VWO Web UUID
+}
+flag2, err := vwoInstance.GetFlag("feature-key", contextWithCustomUuid)
+uuid2 := flag2.GetUUID()
+fmt.Println("Visitor UUID (from context.id):", uuid2)
+```
+
+If `context["id"]` is not a valid web UUID, the SDK falls back to server-side UUID derivation based on `id` and `accountId`, and `GetUUID()` will return that derived UUID.
+
+#### Working with `sessionId`
+
+The Go SDK also exposes the session identifier via `GetSessionId()` on the flag result, which is useful for aligning sessions with the VWO Web SDK or other systems:
+
+- If you **provide** a `sessionId` in the context (as `int` or `int64`), the SDK uses it as-is.
+- If you **omit** `sessionId`, the SDK automatically generates one using the current Unix timestamp.
+
+```go
+// Reuse a session ID from your web layer
+contextWithSession := map[string]interface{}{
+    "id":        "user-123",
+    "sessionId": time.Now().Unix(), // or a session ID from your web client
+}
+
+flag, err := vwoInstance.GetFlag("feature-key", contextWithSession)
+if err != nil {
+    log.Fatalf("Error getting feature flag: %v", err)
+}
+
+sessionID := flag.GetSessionId()
+fmt.Println("Session ID:", sessionID)
+```
+
 ### Basic Feature Flagging
 
 Feature Flags serve as the foundation for all testing, personalization, and rollout rules within FME.

@@ -81,6 +81,15 @@ func GetTrackUserPayloadData(serviceContainer interfaces.ServiceContainerInterfa
 	properties.D.Event.Props.Variation = fmt.Sprintf("%d", variationID)
 	properties.D.Event.Props.IsFirst = 1
 
+	// set sessionId and uuid if they are present in the context
+	if context.GetSessionId() != 0 {
+		properties.D.SessionID = context.GetSessionId()
+	}
+	if context.GetUUID() != "" {
+		properties.D.VisID = context.GetUUID()
+		properties.D.MsgID = GenerateMsgID(context.GetUUID())
+	}
+
 	postSegmentationVariables := context.GetPostSegmentationVariables()
 	customVariables := context.GetCustomVariables()
 
@@ -109,6 +118,14 @@ func GetTrackGoalPayloadData(serviceContainer interfaces.ServiceContainerInterfa
 	properties := GetEventBasePayload(serviceContainer.GetSettingsManager(), userID, eventName, context.UserAgent, context.IPAddress, 0)
 	properties.D.Event.Props.IsCustomEvent = true
 	addCustomEventProperties(properties, eventProperties)
+	// set sessionId and uuid if they are present in the context
+	if context.GetSessionId() != 0 {
+		properties.D.SessionID = context.GetSessionId()
+	}
+	if context.GetUUID() != "" {
+		properties.D.VisID = context.GetUUID()
+		properties.D.MsgID = GenerateMsgID(context.GetUUID())
+	}
 
 	// Log impression for track goal
 	serviceContainer.GetLoggerService().Debug(log.BuildMessage(log.DebugLogMessagesEnum["IMPRESSION_FOR_TRACK_GOAL"], map[string]interface{}{
@@ -122,15 +139,24 @@ func GetTrackGoalPayloadData(serviceContainer interfaces.ServiceContainerInterfa
 }
 
 // GetAttributePayloadData constructs payload data for setting attributes
-func GetAttributePayloadData(serviceContainer interfaces.ServiceContainerInterface, userID string, eventName string, attributeMap map[string]interface{}) map[string]interface{} {
-	properties := GetEventBasePayload(serviceContainer.GetSettingsManager(), userID, eventName, "", "", 0)
+func GetAttributePayloadData(serviceContainer interfaces.ServiceContainerInterface, eventName string, attributeMap map[string]interface{}, context *user.VWOContext) map[string]interface{} {
+	properties := GetEventBasePayload(serviceContainer.GetSettingsManager(), context.GetID(), eventName, "", "", 0)
 	properties.D.Event.Props.IsCustomEvent = true
 	properties.D.Visitor.Props = attributeMap
+
+	// set sessionId and uuid if they are present in the context
+	if context.GetSessionId() != 0 {
+		properties.D.SessionID = context.GetSessionId()
+	}
+	if context.GetUUID() != "" {
+		properties.D.VisID = context.GetUUID()
+		properties.D.MsgID = GenerateMsgID(context.GetUUID())
+	}
 
 	// Log impression for sync visitor properties
 	serviceContainer.GetLoggerService().Debug(log.BuildMessage(log.DebugLogMessagesEnum["IMPRESSION_FOR_SYNC_VISITOR_PROP"], map[string]interface{}{
 		"accountId": serviceContainer.GetSettingsManager().GetAccountID(),
-		"userId":    userID,
+		"userId":    context.GetID(),
 		"eventName": eventName,
 	}))
 

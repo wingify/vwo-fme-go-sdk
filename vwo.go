@@ -25,6 +25,7 @@ import (
 	log "github.com/wingify/vwo-fme-go-sdk/pkg/log_messages"
 	"github.com/wingify/vwo-fme-go-sdk/pkg/models"
 	settingsModel "github.com/wingify/vwo-fme-go-sdk/pkg/models/settings"
+	"github.com/wingify/vwo-fme-go-sdk/pkg/utils"
 )
 
 // Init initializes the VWO FME client with the provided options
@@ -92,4 +93,16 @@ func Init(options map[string]interface{}) (vwoClientInstance *VWOClient, err err
 	}
 
 	return vwoClientInstance, nil
+}
+
+// GetUUID generates a UUID for a user based on their userId and accountId
+func GetUUID(userID string, accountID string) (uuid string, err error) {
+	// check for valid userID and accountID
+	if userID == "" || accountID == "" {
+		return "", fmt.Errorf("userID and accountID are required")
+	}
+
+	// generate UUID using utils.GetUUID
+	uuid = utils.GetUUID(userID, accountID)
+	return uuid, nil
 }

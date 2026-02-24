@@ -135,6 +135,25 @@ func sendInitAndUsageStatsEvents(serviceContainer interfaces.ServiceContainerInt
 // GetFlag retrieves a feature flag for a given feature key and context
 func (client *VWOClient) GetFlag(featureKey string, context map[string]interface{}) (flag models.GetFlagResponse, err error) {
 	apiName := enums.ApiGetFlag
+	sessionId, ok := context[enums.ContextSessionID.GetValue()].(int64)
+	if !ok {
+		// if sessionId is not present in the context, generate a new one
+		sessionId = time.Now().Unix()
+	}
+	uuid, isWebUuid, err := utils.GetUUIDFromContext(context, string(apiName), client.vwoBuilder.options.AccountID, client.settings)
+	if err != nil {
+		client.vwoBuilder.logManager.Error("EXECUTION_FAILED", map[string]interface{}{
+			"apiName": apiName,
+			"err":     err.Error(),
+		}, map[string]interface{}{"an": apiName})
+		return models.NewGetFlag(false, nil, "", sessionId), err
+	}
+	if isWebUuid {
+		client.vwoBuilder.logManager.Debug(log.BuildMessage(log.DebugLogMessagesEnum["WEB_UUID_FOUND"], map[string]interface{}{
+			"uuid":    uuid,
+			"apiName": apiName,
+		}))
+	}
 
 	// handle panic and return default fallback values
 	defer func() {
@@ -144,7 +163,7 @@ func (client *VWOClient) GetFlag(featureKey string, context map[string]interface
 				"err":     fmt.Sprintf("Error in GetFlag: %v", r),
 			}, map[string]interface{}{"an": apiName})
 			// Return default fallback values
-			flag = &models.GetFlag{Enabled: false}
+			flag = models.NewGetFlag(false, nil, uuid, sessionId)
 			err = fmt.Errorf("panic recovered in GetFlag: %v", r)
 		}
 	}()
@@ -152,6 +171,16 @@ func (client *VWOClient) GetFlag(featureKey string, context map[string]interface
 	client.vwoBuilder.logManager.Debug(log.BuildMessage(log.DebugLogMessagesEnum["API_CALLED"], map[string]interface{}{
 		"apiName": apiName,
 	}))
+
+	// Validate context
+	if context == nil || context[enums.ContextID.GetValue()] == nil || context[enums.ContextID.GetValue()] == "" {
+		client.vwoBuilder.logManager.Error("INVALID_CONTEXT", nil, map[string]interface{}{"an": apiName})
+		return models.NewGetFlag(false, nil, uuid, sessionId), fmt.Errorf("invalid context")
+	}
+
+	// Convert context to VWOContext
+	contextModel := user.NewVWOContext(context)
+	contextModel.SetUUID(uuid)
 
 	// Validate featureKey
 	if featureKey == "" {
@@ -164,12 +193,6 @@ func (client *VWOClient) GetFlag(featureKey string, context map[string]interface
 		return &models.GetFlag{Enabled: false}, fmt.Errorf("featureKey should be a non-empty string")
 	}
 
-	// Validate context
-	if context == nil || context[enums.ContextID.GetValue()] == nil || context[enums.ContextID.GetValue()] == "" {
-		client.vwoBuilder.logManager.Error("INVALID_CONTEXT", nil, map[string]interface{}{"an": apiName})
-		return &models.GetFlag{Enabled: false}, fmt.Errorf("invalid context")
-	}
-
 	// Validate settings
 	if !client.isSettingsValid {
 		client.vwoBuilder.logManager.Error("INVALID_SETTINGS_SCHEMA", map[string]interface{}{
@@ -180,13 +203,6 @@ func (client *VWOClient) GetFlag(featureKey string, context map[string]interface
 		}, map[string]interface{}{"an": apiName})
 		return &models.GetFlag{Enabled: false}, fmt.Errorf(client.settingsInvalidReason)
 	}
-
-	// Convert context to VWOContext
-	contextModel := user.NewVWOContext(context)
-
-	// generate uuid for the user
-	uuid := utils.GetUUID(contextModel.ID, strconv.Itoa(client.vwoBuilder.options.AccountID))
-	contextModel.SetUUID(uuid)
 
 	// Create service container
 	serviceContainer := core.NewServiceContainer(
@@ -211,6 +227,20 @@ func (client *VWOClient) GetFlag(featureKey string, context map[string]interface
 // TrackEvent tracks an event with specified properties and context and returns true if the event is tracked successfully
 func (client *VWOClient) TrackEvent(eventName string, context map[string]interface{}, eventProperties ...map[string]interface{}) (result map[string]bool, err error) {
 	apiName := enums.ApiTrackEvent
+	uuid, isWebUuid, err := utils.GetUUIDFromContext(context, string(apiName), client.vwoBuilder.options.AccountID, client.settings)
+	if err != nil {
+		client.vwoBuilder.logManager.Error("EXECUTION_FAILED", map[string]interface{}{
+			"apiName": apiName,
+			"err":     err.Error(),
+		}, map[string]interface{}{"an": apiName})
+		return map[string]bool{eventName: false}, err
+	}
+	if isWebUuid {
+		client.vwoBuilder.logManager.Debug(log.BuildMessage(log.DebugLogMessagesEnum["WEB_UUID_FOUND"], map[string]interface{}{
+			"uuid":    uuid,
+			"apiName": apiName,
+		}))
+	}
 
 	// handle panic and return default fallback values
 	defer func() {
@@ -259,9 +289,6 @@ func (client *VWOClient) TrackEvent(eventName string, context map[string]interfa
 
 	// Convert context to VWOContext
 	contextModel := user.NewVWOContext(context)
-
-	// generate uuid for the user
-	uuid := utils.GetUUID(contextModel.ID, strconv.Itoa(client.vwoBuilder.options.AccountID))
 	contextModel.SetUUID(uuid)
 
 	// Create service container
@@ -289,6 +316,20 @@ func (client *VWOClient) TrackEvent(eventName string, context map[string]interfa
 // SetAttribute sets multiple attributes for a user and sends an impression to vwo
 func (client *VWOClient) SetAttribute(attributes map[string]interface{}, context map[string]interface{}) error {
 	apiName := enums.ApiSetAttribute
+	uuid, isWebUuid, err := utils.GetUUIDFromContext(context, string(apiName), client.vwoBuilder.options.AccountID, client.settings)
+	if err != nil {
+		client.vwoBuilder.logManager.Error("EXECUTION_FAILED", map[string]interface{}{
+			"apiName": apiName,
+			"err":     err.Error(),
+		}, map[string]interface{}{"an": apiName})
+		return err
+	}
+	if isWebUuid {
+		client.vwoBuilder.logManager.Debug(log.BuildMessage(log.DebugLogMessagesEnum["WEB_UUID_FOUND"], map[string]interface{}{
+			"uuid":    uuid,
+			"apiName": apiName,
+		}))
+	}
 
 	// handle panic and return error
 	defer func() {
@@ -345,9 +386,6 @@ func (client *VWOClient) SetAttribute(attributes map[string]interface{}, context
 
 	// Convert context to VWOContext
 	contextModel := user.NewVWOContext(context)
-
-	// generate uuid for the user
-	uuid := utils.GetUUID(contextModel.ID, strconv.Itoa(client.vwoBuilder.options.AccountID))
 	contextModel.SetUUID(uuid)
 
 	// Create service container

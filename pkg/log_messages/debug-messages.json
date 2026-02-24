@@ -20,5 +20,6 @@
   "EVENT_ADDED_TO_QUEUE": "Event added to queue. Current queue size: {queueSize}",
   "QUEUE_REACHED_MAX_CAPACITY": "Queue reached max capacity, flushing now...",
   "BATCH_TIMER_INITIALIZED": "Batch timer initialized with interval: {interval} seconds.",
-  "BATCH_EVENT_QUEUE_INITIALIZED": "Batch event queue initialized with eventsPerRequest: {eventsPerRequest} and requestTimeInterval: {requestTimeInterval}"
+  "BATCH_EVENT_QUEUE_INITIALIZED": "Batch event queue initialized with eventsPerRequest: {eventsPerRequest} and requestTimeInterval: {requestTimeInterval}",
+  "WEB_UUID_FOUND": "VWO Web Testing identified UUID {uuid} as the Context ID for API {apiName}"
 }

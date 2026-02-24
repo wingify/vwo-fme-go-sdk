@@ -17,6 +17,7 @@
 package constants
 
 import (
+	"regexp"
 	"time"
 )
 
@@ -37,7 +38,7 @@ const (
 
 	// SDK information
 	SDKName    = "vwo-fme-go-sdk"
-	SDKVersion = "1.5.0"
+	SDKVersion = "1.6.0"
 
 	// Settings constants
 	SettingsExpiry  = 10000000
@@ -87,3 +88,6 @@ const (
 
 // NonRetryable events
 var NonRetryableEvents = []string{"vwo_sdkDebug", "vwo_sdkUsageStats", "vwo_fmeSdkInit"}
+
+// Web UUID regex
+var WebUUIDRegex = regexp.MustCompile(`^[DJ][0-9A-Fa-f]{32}$`)

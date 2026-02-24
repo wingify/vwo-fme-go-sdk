@@ -46,9 +46,9 @@ func createAndSendImpressionForSetAttribute(
 	// Construct payload data for setting attributes
 	payload := utils.GetAttributePayloadData(
 		serviceContainer,
-		context.GetID(),
 		enums.VWOSyncVisitorProp.GetValue(),
 		attributeMap,
+		context,
 	)
 
 	// Check if batch event queue is available

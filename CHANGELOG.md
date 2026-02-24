@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-02-25
+
+### Added
+
+- Added support to use the context `id` as the visitor UUID instead of auto-generating one. You can read the visitor UUID from the flag result via `flag.GetUUID()` (e.g. to pass to the web client).
+
+	Example usage:
+
+	```go
+	vwoInstance, err := vwo.Init(map[string]interface{}{
+		"accountId": 123456,
+		"sdkKey":   "32-alpha-numeric-sdk-key",
+	})
+	if err != nil {
+		log.Fatalf("Failed to initialize VWO client: %v", err)
+	}
+
+	// Default: SDK generates a UUID from id and account
+	contextWithGeneratedUuid := map[string]interface{}{"id": "user-123"}
+	flag1, err := vwoInstance.GetFlag("feature-key", contextWithGeneratedUuid)
+	// Get the UUID from the flag result (e.g. to pass to web client)
+	uuid := flag1.GetUUID()
+	fmt.Println("Visitor UUID:", uuid)
+
+	// Use your own UUID (e.g. from web client) by passing a valid web UUID in context.id
+	contextWithCustomUuid := map[string]interface{}{
+		"id": "D7E2EAA667909A2DB8A6371FF0975C2A5", // your existing UUID
+	}
+	flag2, err := vwoInstance.GetFlag("feature-key", contextWithCustomUuid)
+	```
+
 ## [1.5.0] - 2026-01-23
 
 ### Added
