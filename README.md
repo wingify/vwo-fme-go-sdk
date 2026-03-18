@@ -114,6 +114,7 @@ The following table explains all the parameters in the context map:
 | **Parameter** | **Description** | **Required** | **Type** |
 |---------------|-----------------|--------------|----------|
 | `id` | Unique identifier for the user. | Yes | string |
+| `bucketingSeed` | Custom string used for bucketing instead of user `id`. See [Custom Bucketing Seed](#custom-bucketing-seed). | No | string |
 | `customVariables` | Custom attributes for targeting. | No | map[string]interface{} |
 | `userAgent` | User agent string for identifying the user's browser and operating system. | No | string |
 | `ipAddress` | IP address of the user. | No | string |
@@ -133,6 +134,25 @@ context := map[string]interface{}{
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
     "ipAddress": "1.1.1.1",
 }
+```
+
+### Custom Bucketing Seed
+
+By default, the SDK uses the user `id` to determine which variation a user receives. The `bucketingSeed` option in the context lets you override this with a shared identifier (e.g., a company ID), so all users sharing the same seed are bucketed into the same variation.
+
+| **Parameter**   | **Description**                                         | **Required** | **Type** | **Example**     |
+| --------------- | ------------------------------------------------------- | ------------ | -------- | --------------- |
+| `bucketingSeed` | A custom string used for bucketing instead of user `id` | No           | string   | `"company-abc"` |
+
+#### Example Usage
+
+```go
+// All employees of company-abc will get the same variation
+context := map[string]interface{}{
+	"id":            "employee-123",
+	"bucketingSeed": "company-abc",
+}
+flag, err := vwoInstance.GetFlag("feature-key", context)
 ```
 
 ### FME Web Connectivity

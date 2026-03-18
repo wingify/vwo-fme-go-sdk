@@ -188,7 +188,7 @@ func (mu *MegUtil) isRolloutRuleForFeaturePassed(
 		}
 
 		if ruleToTestForTraffic != nil {
-			variation := EvaluateTrafficAndGetVariation(serviceContainer, ruleToTestForTraffic, context.GetID())
+			variation := EvaluateTrafficAndGetVariation(serviceContainer, ruleToTestForTraffic, context)
 			if variation != nil {
 				rollOutInformation := map[string]interface{}{
 					enums.DecisionRolloutID.GetValue():          variation.GetID(),
@@ -268,7 +268,7 @@ func (mu *MegUtil) getEligibleCampaigns(
 
 			// Check if user is eligible for the campaign
 			if GetPreSegmentationDecision(campaign, context, serviceContainer) &&
-				IsUserPartOfCampaign(context.GetID(), campaign, serviceContainer) {
+				IsUserPartOfCampaign(context, campaign, serviceContainer) {
 				serviceContainer.GetLoggerService().Info(log.BuildMessage(log.InfoLogMessagesEnum["MEG_CAMPAIGN_ELIGIBLE"], map[string]interface{}{
 					"campaignKey": getCampaignKey(campaign),
 					"userId":      context.GetID(),
@@ -397,7 +397,8 @@ func (mu *MegUtil) normalizeWeightsAndFindWinningCampaign(
 
 	SetCampaignAllocation(variations)
 
-	bucketValue := decision_maker.CalculateBucketValue(GetBucketingSeed(context.GetID(), nil, &groupId))
+	bucketingID := GetBucketingID(context, serviceContainer)
+	bucketValue := decision_maker.CalculateBucketValue(GetBucketingSeed(bucketingID, nil, &groupId))
 
 	winnerVariation := GetVariation(variations, bucketValue)
 
@@ -408,10 +409,13 @@ func (mu *MegUtil) normalizeWeightsAndFindWinningCampaign(
 		} else {
 			winnerCampaignKey = winnerVariation.GetName() + "_" + winnerVariation.GetRuleKey()
 		}
+
+		userIDLog := GetUserIdForLogging(context.GetID(), bucketingID)
+
 		serviceContainer.GetLoggerService().Info(log.BuildMessage(log.InfoLogMessagesEnum["MEG_WINNER_CAMPAIGN"], map[string]interface{}{
 			"campaignKey": winnerCampaignKey,
 			"groupId":     strconv.Itoa(groupId),
-			"userId":      context.GetID(),
+			"userId":      userIDLog,
 			"algo":        "using random algorithm",
 		}))
 
@@ -529,7 +533,8 @@ func (mu *MegUtil) getCampaignUsingAdvancedAlgo(
 
 		SetCampaignAllocation(variations)
 
-		bucketValue := decision_maker.CalculateBucketValue(GetBucketingSeed(context.GetID(), nil, &groupId))
+		bucketingID := GetBucketingID(context, serviceContainer)
+		bucketValue := decision_maker.CalculateBucketValue(GetBucketingSeed(bucketingID, nil, &groupId))
 		winnerCampaign = GetVariation(variations, bucketValue)
 	}
 
@@ -540,10 +545,14 @@ func (mu *MegUtil) getCampaignUsingAdvancedAlgo(
 		} else {
 			winnerCampaignKey = winnerCampaign.GetName() + "_" + winnerCampaign.GetRuleKey()
 		}
+
+		bucketingID := GetBucketingID(context, serviceContainer)
+		userIDLog := GetUserIdForLogging(context.GetID(), bucketingID)
+
 		serviceContainer.GetLoggerService().Info(log.BuildMessage(log.InfoLogMessagesEnum["MEG_WINNER_CAMPAIGN"], map[string]interface{}{
 			"campaignKey": winnerCampaignKey,
 			"groupId":     strconv.Itoa(groupId),
-			"userId":      context.GetID(),
+			"userId":      userIDLog,
 			"algo":        "using advanced algorithm",
 		}))
 

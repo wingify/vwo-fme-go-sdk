@@ -33,6 +33,7 @@ type VWOContext struct {
 	VWO                         *ContextVWO            `json:"_vwo,omitempty"`
 	SessionId                   int64                  `json:"sessionId,omitempty"`
 	UUID                        string                 `json:"uuid,omitempty"`
+	BucketingSeed               string                 `json:"bucketingSeed,omitempty"`
 }
 
 // NewVWOContext creates a new VWOContext from a map
@@ -89,6 +90,13 @@ func NewVWOContext(context map[string]interface{}) *VWOContext {
 		}
 	}
 	vwoContext.SessionId = sessionId
+
+	if bucketingSeed, ok := context[enums.ContextBucketingSeed.GetValue()]; ok {
+		if bucketingSeedStr, ok := bucketingSeed.(string); ok {
+			vwoContext.BucketingSeed = bucketingSeedStr
+		}
+	}
+
 	return vwoContext
 }
 
@@ -165,4 +173,14 @@ func (c *VWOContext) SetSessionId(sessionId int64) {
 // SetUUID sets the UUID
 func (c *VWOContext) SetUUID(uuid string) {
 	c.UUID = uuid
+}
+
+// GetBucketingSeed returns the custom bucketing seed
+func (c *VWOContext) GetBucketingSeed() string {
+	return c.BucketingSeed
+}
+
+// SetBucketingSeed sets the custom bucketing seed
+func (c *VWOContext) SetBucketingSeed(bucketingSeed string) {
+	c.BucketingSeed = bucketingSeed
 }

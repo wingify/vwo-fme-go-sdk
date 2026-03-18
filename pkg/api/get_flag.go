@@ -183,7 +183,7 @@ func GetFlag(featureKey string, context *user.VWOContext, serviceContainer inter
 			variation := utils.EvaluateTrafficAndGetVariation(
 				serviceContainer,
 				passedRolloutCampaign,
-				context.GetID(),
+				context,
 			)
 			if variation != nil {
 				variables := variation.GetVariables()
@@ -263,7 +263,7 @@ func GetFlag(featureKey string, context *user.VWOContext, serviceContainer inter
 			variation := utils.EvaluateTrafficAndGetVariation(
 				serviceContainer,
 				campaign,
-				context.GetID(),
+				context,
 			)
 			if variation != nil {
 				variables := variation.GetVariables()

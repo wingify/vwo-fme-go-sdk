@@ -314,24 +314,29 @@ func CheckWhitelistingAndPreSeg(
 	}
 }
 
-// EvaluateTrafficAndGetVariation evaluates the traffic for a given campaign and get the variation
 func EvaluateTrafficAndGetVariation(
 	serviceContainer interfaces.ServiceContainerInterface, // ServiceContainer object
 	campaignModel *campaign.Campaign,
-	userID string,
+	context *user.VWOContext,
 ) *campaign.Variation {
+	if context == nil || context.GetID() == "" {
+		return nil
+	}
 	// Get the variation allotted to the user
 	var variation *campaign.Variation = nil
 	accountID := serviceContainer.GetSettingsManager().GetAccountID()
 
-	variation = GetVariationAllotted(userID, accountID, campaignModel, serviceContainer)
+	variation = GetVariationAllotted(context, accountID, campaignModel, serviceContainer)
+	userID := context.GetID()
+	bucketingID := GetBucketingID(context, serviceContainer)
 
 	if variation == nil {
 		// Log that user did not get any variation
 		if serviceContainer != nil {
+			userIDLog := GetUserIdForLogging(userID, bucketingID)
 			campaignKey := getCampaignKey(campaignModel)
 			serviceContainer.GetLoggerService().Info(log.BuildMessage(log.InfoLogMessagesEnum["USER_CAMPAIGN_BUCKET_INFO"], map[string]interface{}{
-				"userId":      userID,
+				"userId":      userIDLog,
 				"campaignKey": campaignKey,
 				"status":      "did not get any variation",
 			}))
@@ -341,9 +346,10 @@ func EvaluateTrafficAndGetVariation(
 
 	// Log that user got a variation
 	if serviceContainer != nil {
+		userIDLog := GetUserIdForLogging(userID, bucketingID)
 		campaignKey := getCampaignKey(campaignModel)
 		serviceContainer.GetLoggerService().Info(log.BuildMessage(log.InfoLogMessagesEnum["USER_CAMPAIGN_BUCKET_INFO"], map[string]interface{}{
-			"userId":      userID,
+			"userId":      userIDLog,
 			"campaignKey": campaignKey,
 			"status":      "got variation: " + variation.Name,
 		}))
@@ -369,9 +375,12 @@ func checkCampaignWhitelisting(
 	}
 
 	if serviceContainer != nil {
+		userID := context.ID
+		bucketingID := GetBucketingID(context, serviceContainer)
+		userIDLog := GetUserIdForLogging(userID, bucketingID)
 		campaignKey := getCampaignKey(campaignModel)
 		serviceContainer.GetLoggerService().Info(log.BuildMessage(log.InfoLogMessagesEnum["WHITELISTING_STATUS"], map[string]interface{}{
-			"userId":          context.ID,
+			"userId":          userIDLog,
 			"campaignKey":     campaignKey,
 			"status":          status,
 			"variationString": variationString,
@@ -430,7 +439,9 @@ func evaluateWhitelisting(
 			stepFactor := AssignRangeValues(&targetedVariations[i], currentAllocation)
 			currentAllocation += stepFactor
 		}
-		bucketingSeed := GetBucketingSeed(context.ID, campaignModel, nil)
+		// Resolve bucketing ID for whitelisting
+		bucketingID := GetBucketingID(context, serviceContainer)
+		bucketingSeed := GetBucketingSeed(bucketingID, campaignModel, nil)
 		bucketValue := decision_maker.CalculateBucketValue(bucketingSeed)
 
 		whitelistedVariation = GetVariation(targetedVariations, bucketValue)
@@ -468,13 +479,15 @@ func getVariationIDForPersonalize(campaignModel *campaign.Campaign) int {
 
 // IsUserPartOfCampaign checks if the user is part of the campaign based on traffic allocation
 func IsUserPartOfCampaign(
-	userID string,
+	context *user.VWOContext,
 	campaignModel *campaign.Campaign,
 	serviceContainer interfaces.ServiceContainerInterface,
 ) bool {
-	if campaignModel == nil || userID == "" {
+	if campaignModel == nil || context == nil || context.GetID() == "" {
 		return false
 	}
+	userID := context.GetID()
+	bucketingID := GetBucketingID(context, serviceContainer)
 
 	var trafficAllocation float64
 	var salt string
@@ -484,7 +497,7 @@ func IsUserPartOfCampaign(
 	isRolloutOrPersonalize := campaignType == string(enums.CampaignTypeRollout) ||
 		campaignType == string(enums.CampaignTypePersonalize)
 
-		// Get salt and traffic allocation based on campaign type
+	// Get salt and traffic allocation based on campaign type
 	if isRolloutOrPersonalize {
 		salt = campaignModel.Variations[0].Salt
 		trafficAllocation = campaignModel.Variations[0].Weight
@@ -496,9 +509,9 @@ func IsUserPartOfCampaign(
 	// Generate bucket key using salt if available, otherwise use campaign ID
 	var bucketKey string
 	if salt != "" {
-		bucketKey = salt + "_" + userID
+		bucketKey = salt + "_" + bucketingID
 	} else {
-		bucketKey = strconv.Itoa(campaignModel.ID) + "_" + userID
+		bucketKey = strconv.Itoa(campaignModel.ID) + "_" + bucketingID
 	}
 
 	valueAssignedToUser := decision_maker.GetBucketValueForUser(bucketKey)
@@ -512,8 +525,9 @@ func IsUserPartOfCampaign(
 
 	// Log using serviceContainer logger
 	if serviceContainer != nil {
+		userIDLog := GetUserIdForLogging(userID, bucketingID)
 		serviceContainer.GetLoggerService().Info(log.BuildMessage(log.InfoLogMessagesEnum["USER_PART_OF_CAMPAIGN"], map[string]interface{}{
-			"userId":      userID,
+			"userId":      userIDLog,
 			"notPart":     notPart,
 			"campaignKey": campaignKey,
 		}))
@@ -550,14 +564,16 @@ func CheckInRange(
 
 // BucketUserToVariation buckets the user to a variation based on the bucket value
 func BucketUserToVariation(
-	userID string,
+	context *user.VWOContext,
 	accountID string,
 	campaignModel *campaign.Campaign,
 	serviceContainer interfaces.ServiceContainerInterface,
 ) *campaign.Variation {
-	if campaignModel == nil || userID == "" {
+	if campaignModel == nil || context == nil || context.GetID() == "" {
 		return nil
 	}
+	userID := context.GetID()
+	bucketingID := GetBucketingID(context, serviceContainer)
 
 	multiplier := 1
 	if campaignModel.PercentTraffic == 0 {
@@ -570,9 +586,9 @@ func BucketUserToVariation(
 	var bucketKey string
 	// If salt is not null and not empty, use salt else use campaign id
 	if salt != "" {
-		bucketKey = salt + "_" + accountID + "_" + userID
+		bucketKey = salt + "_" + accountID + "_" + bucketingID
 	} else {
-		bucketKey = strconv.Itoa(campaignModel.ID) + "_" + accountID + "_" + userID
+		bucketKey = strconv.Itoa(campaignModel.ID) + "_" + accountID + "_" + bucketingID
 	}
 
 	hashValue := decision_maker.GenerateHashValue(bucketKey)
@@ -580,8 +596,9 @@ func BucketUserToVariation(
 
 	// Log using serviceContainer logger
 	if serviceContainer != nil {
+		userIDLog := GetUserIdForLogging(userID, bucketingID)
 		serviceContainer.GetLoggerService().Debug(log.BuildMessage(log.DebugLogMessagesEnum["USER_BUCKET_TO_VARIATION"], map[string]interface{}{
-			"userId":         userID,
+			"userId":         userIDLog,
 			"campaignKey":    campaignModel.RuleKey,
 			"percentTraffic": strconv.Itoa(percentTraffic),
 			"bucketValue":    strconv.Itoa(bucketValue),
@@ -656,12 +673,12 @@ func GetPreSegmentationDecision(
 
 // GetVariationAllotted gets the variation allotted to the user in the campaign
 func GetVariationAllotted(
-	userID string,
+	context *user.VWOContext,
 	accountID string,
 	campaignModel *campaign.Campaign,
 	serviceContainer interfaces.ServiceContainerInterface,
 ) *campaign.Variation {
-	isUserPart := IsUserPartOfCampaign(userID, campaignModel, serviceContainer)
+	isUserPart := IsUserPartOfCampaign(context, campaignModel, serviceContainer)
 	if campaignModel.Type == string(enums.CampaignTypeRollout) ||
 		campaignModel.Type == string(enums.CampaignTypePersonalize) {
 		if isUserPart {
@@ -671,7 +688,7 @@ func GetVariationAllotted(
 	}
 
 	if isUserPart {
-		return BucketUserToVariation(userID, accountID, campaignModel, serviceContainer)
+		return BucketUserToVariation(context, accountID, campaignModel, serviceContainer)
 	}
 	return nil
 }

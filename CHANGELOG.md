@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-03-11
+
+### Added
+
+- Added support for custom bucketing seed via `bucketingSeed` in the context. This allows users to bucket by a shared identifier instead of the individual user ID, ensuring all users within the same group receive the same variation.
+
+	Example usage:
+
+	```go
+	vwoInstance, err := vwo.Init(map[string]interface{}{
+		"accountId":         123456,
+		"sdkKey":            "32-alpha-numeric-sdk-key",
+	})
+	if err != nil {
+		log.Fatalf("Failed to initialize VWO client: %v", err)
+	}
+
+	// Use bucketing seed
+	context := map[string]interface{}{
+		"id":            "new_user_id",
+		"bucketingSeed": "some-seed-xyz",
+	}
+	
+	flag, err := vwoInstance.GetFlag("feature-key", context)
+	```
+
 ## [1.6.0] - 2026-02-25
 
 ### Added

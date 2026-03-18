@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/wingify/vwo-fme-go-sdk/pkg/api"
@@ -176,6 +177,13 @@ func (client *VWOClient) GetFlag(featureKey string, context map[string]interface
 	if context == nil || context[enums.ContextID.GetValue()] == nil || context[enums.ContextID.GetValue()] == "" {
 		client.vwoBuilder.logManager.Error("INVALID_CONTEXT", nil, map[string]interface{}{"an": apiName})
 		return models.NewGetFlag(false, nil, uuid, sessionId), fmt.Errorf("invalid context")
+	}
+
+	if seed, ok := context[enums.ContextBucketingSeed.GetValue()]; ok {
+		if seedStr, isStr := seed.(string); !isStr || strings.TrimSpace(seedStr) == "" {
+			client.vwoBuilder.logManager.Error("INVALID_BUCKETING_SEED", nil, map[string]interface{}{"an": apiName})
+			delete(context, enums.ContextBucketingSeed.GetValue())
+		}
 	}
 
 	// Convert context to VWOContext

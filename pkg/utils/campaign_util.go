@@ -27,6 +27,7 @@ import (
 	log "github.com/wingify/vwo-fme-go-sdk/pkg/log_messages"
 	"github.com/wingify/vwo-fme-go-sdk/pkg/models/campaign"
 	"github.com/wingify/vwo-fme-go-sdk/pkg/models/settings"
+	"github.com/wingify/vwo-fme-go-sdk/pkg/models/user"
 	"github.com/wingify/vwo-fme-go-sdk/pkg/packages/interfaces"
 )
 
@@ -416,4 +417,44 @@ func IsFeaturePresentInSettings(settingsModel *settings.Settings, featureId int)
 		}
 	}
 	return false
+}
+
+// GetBucketingID returns the bucketing ID for a user based on the custom bucketing seed configuration.
+//
+// Args:
+//    context: A pointer to the VWOContext struct containing user information.
+//    serviceContainer: An interface to the ServiceContainer which holds initialization options.
+//
+// Returns:
+//    string: The identifier to be used for bucketing (either the BucketingSeed or the UserID).
+func GetBucketingID(
+	context *user.VWOContext,
+	serviceContainer interfaces.ServiceContainerInterface,
+) string {
+	if context == nil {
+		return ""
+	}
+	userID := context.GetID()
+	bucketingSeed := context.GetBucketingSeed()
+
+	if bucketingSeed != "" {
+		return bucketingSeed
+	}
+
+	return userID
+}
+
+// GetUserIdForLogging returns the user ID to be used in logs. It appends the bucketing ID if it differs from the user ID.
+//
+// Args:
+//    userID: The original user ID.
+//    bucketingID: The bucketing ID used for the decision.
+//
+// Returns:
+//    string: The formatted string for logging.
+func GetUserIdForLogging(userID, bucketingID string) string {
+	if bucketingID != userID {
+		return userID + " (Seed: " + bucketingID + ")"
+	}
+	return userID
 }
