@@ -190,10 +190,6 @@ func (settingsSchema *SettingsSchema) validateCampaignVariation(variation *campa
 		result.AddError(prefix + "Variation name is null")
 	}
 
-	if variation.Weight == 0 {
-		result.AddError(prefix + "Variation weight is empty")
-	}
-
 	if variation.Variables != nil {
 		for i, variable := range variation.Variables {
 			variableResult := settingsSchema.validateVariableObject(&variable, fmt.Sprintf("Campaign[%d].Variation[%d].Variable[%d]", campaignIndex, variationIndex, i))

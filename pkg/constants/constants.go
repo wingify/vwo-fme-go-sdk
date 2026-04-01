@@ -38,7 +38,7 @@ const (
 
 	// SDK information
 	SDKName    = "vwo-fme-go-sdk"
-	SDKVersion = "1.7.0"
+	SDKVersion = "1.7.1"
 
 	// Settings constants
 	SettingsExpiry  = 10000000
