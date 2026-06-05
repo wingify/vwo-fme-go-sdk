@@ -16,15 +16,15 @@
 
 package testCases
 
-import "github.com/wingify/vwo-fme-go-sdk/pkg/models/user"
+import "github.com/wingify/wingify-fme-go-sdk/pkg/models/user"
 
 // TestData represents a single test case
 type TestData struct {
-	Description string           `json:"description"`
-	Settings    string           `json:"settings"`
-	Context     *user.VWOContext `json:"context"`
-	UserIds     []string         `json:"userIds"`
-	Expectation *Expectation     `json:"expectation"`
-	FeatureKey  string           `json:"featureKey"`
-	FeatureKey2 string           `json:"featureKey2"`
+	Description string                   `json:"description"`
+	Settings    string                   `json:"settings"`
+	Context     *user.WingifyUserContext `json:"context"`
+	UserIds     []string                 `json:"userIds"`
+	Expectation *Expectation             `json:"expectation"`
+	FeatureKey  string                   `json:"featureKey"`
+	FeatureKey2 string                   `json:"featureKey2"`
 }

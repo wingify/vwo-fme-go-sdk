@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wingify/vwo-fme-go-sdk/pkg/packages/decision_maker"
+	"github.com/wingify/wingify-fme-go-sdk/pkg/packages/decision_maker"
 )
 
 func TestDecisionMaker(t *testing.T) {

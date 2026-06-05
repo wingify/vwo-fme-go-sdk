@@ -16,7 +16,7 @@
 
 package testCases
 
-import "github.com/wingify/vwo-fme-go-sdk/pkg/models/storage"
+import "github.com/wingify/wingify-fme-go-sdk/pkg/models/storage"
 
 // Expectation represents the expected result for a test case
 type Expectation struct {

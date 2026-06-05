@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"sync"
 
-	storageModels "github.com/wingify/vwo-fme-go-sdk/pkg/models/storage"
+	storageModels "github.com/wingify/wingify-fme-go-sdk/pkg/models/storage"
 )
 
 // StorageTest implements the storage.Connector interface for testing

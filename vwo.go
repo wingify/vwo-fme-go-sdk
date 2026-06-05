@@ -17,92 +17,23 @@
 package vwo
 
 import (
-	"encoding/json"
-	"fmt"
-	"time"
-
-	"github.com/wingify/vwo-fme-go-sdk/pkg/enums"
-	log "github.com/wingify/vwo-fme-go-sdk/pkg/log_messages"
-	"github.com/wingify/vwo-fme-go-sdk/pkg/models"
-	settingsModel "github.com/wingify/vwo-fme-go-sdk/pkg/models/settings"
-	"github.com/wingify/vwo-fme-go-sdk/pkg/utils"
+	wingify "github.com/wingify/wingify-fme-go-sdk"
+	"github.com/wingify/wingify-fme-go-sdk/pkg/enums"
 )
 
-// Init initializes the VWO FME client with the provided options
-func Init(options map[string]interface{}) (vwoClientInstance *VWOClient, err error) {
-	// handle panic and return error
-	defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("failed to initialize VWO FME client: %v", r)
-		}
-	}()
+// VWOClient is the legacy compatibility alias for the Wingify FME client.
+type VWOClient = wingify.WingifyClient
 
-	// start time for init
-	startTimeForInit := time.Now().UnixNano() / 1e6
-	// Validate required parameters
-	if options[enums.OptionSDKKey.GetValue()] == nil || options[enums.OptionSDKKey.GetValue()] == "" {
-		return nil, fmt.Errorf(log.ErrorLogMessagesEnum["INVALID_SDK_KEY_IN_OPTIONS"])
+// Init initializes the VWO FME client using the Wingify SDK with the vwo host profile.
+func Init(options map[string]interface{}) (*VWOClient, error) {
+	if options == nil {
+		options = map[string]interface{}{}
 	}
-
-	if options[enums.OptionAccountID.GetValue()] == nil || options[enums.OptionAccountID.GetValue()] == 0 {
-		return nil, fmt.Errorf(log.ErrorLogMessagesEnum["INVALID_ACCOUNT_ID_IN_OPTIONS"])
-	}
-
-	// Convert map to VWOInitOptions using the factory function
-	vwoOptions := models.NewVWOInitOptions(options)
-
-	if vwoOptions == nil {
-		return nil, fmt.Errorf(log.ErrorLogMessagesEnum["INVALID_OPTIONS"])
-	}
-
-	// Create builder and setup services
-	builder := &vwoBuilder{
-		options: vwoOptions,
-	}
-
-	builder.SetLogger().
-		SetSettingsManager().
-		SetNetworkManager().
-		SetStorage().
-		InitBatching().
-		InitPolling()
-
-	// Check if settings were provided in options
-	builder.settingsManager.StartTimeForInit = startTimeForInit
-	if vwoOptions.Settings != "" {
-		// Parse and validate the provided settings
-		builder.originalSettings = vwoOptions.Settings
-		builder.settingsManager.IsSettingsProvidedInInit = true
-
-		// Parse the settings JSON string into Settings object
-		var settingsObj settingsModel.Settings
-		err := json.Unmarshal([]byte(vwoOptions.Settings), &settingsObj)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse provided settings: %v", err)
-		}
-
-		// Set the parsed settings
-		builder.settings = &settingsObj
-		builder.settingsManager.SetSettings(&settingsObj, vwoOptions.Settings)
-
-		vwoClientInstance = builder.Build(builder.settings)
-	} else {
-		// Fetch settings from server
-		builder.GetSettings(false)
-		vwoClientInstance = builder.Build(builder.settings)
-	}
-
-	return vwoClientInstance, nil
+	options[enums.OptionHostProfile.GetValue()] = "vwo"
+	return wingify.Init(options)
 }
 
-// GetUUID generates a UUID for a user based on their userId and accountId
-func GetUUID(userID string, accountID string) (uuid string, err error) {
-	// check for valid userID and accountID
-	if userID == "" || accountID == "" {
-		return "", fmt.Errorf("userID and accountID are required")
-	}
-
-	// generate UUID using utils.GetUUID
-	uuid = utils.GetUUID(userID, accountID)
-	return uuid, nil
+// GetUUID generates a UUID for a user based on their userId and accountId.
+func GetUUID(userID string, accountID string) (string, error) {
+	return wingify.GetUUID(userID, accountID)
 }

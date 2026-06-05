@@ -20,8 +20,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	loggerCore "github.com/wingify/vwo-fme-go-sdk/pkg/packages/logger/core"
-	segmentationCore "github.com/wingify/vwo-fme-go-sdk/pkg/packages/segmentation_evaluator/core"
+	loggerCore "github.com/wingify/wingify-fme-go-sdk/pkg/packages/logger/core"
+	segmentationCore "github.com/wingify/wingify-fme-go-sdk/pkg/packages/segmentation_evaluator/core"
 )
 
 func TestEqualityOperand(t *testing.T) {

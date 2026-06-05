@@ -20,7 +20,7 @@ console.time('Execution time for License and Copyright');
 const isSuccess = checkLicenseUtil.checkLicenseAndCopyright({
   year: '2025',
   author: 'Wingify Software Pvt. Ltd.',
-  paths: 'pkg/',
+  paths: 'vwo.go',
   stoppingCriteria: '\\*\\/',
   excludes: [''],
   extension: 'go'

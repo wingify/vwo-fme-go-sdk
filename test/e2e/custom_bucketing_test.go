@@ -23,7 +23,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/wingify/vwo-fme-go-sdk"
-	"github.com/wingify/vwo-fme-go-sdk/pkg/enums"
+	"github.com/wingify/wingify-fme-go-sdk/pkg/enums"
 )
 
 const mockSettingsFile = `{
